@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ asset('css/common.css') }}">
     <link rel="stylesheet" href="{{ asset('css/attendance.css') }}">
     <link rel="stylesheet" href="{{ asset('css/register.css') }}">
+    @yield('css')
 </head>
 <body>
 
@@ -19,10 +20,30 @@
         </div>
 
         <nav class="header__nav">
-            <a href="#">勤怠</a>
-            <a href="#">勤怠一覧</a>
-            <a href="#">申請</a>
-            <a href="#">ログアウト</a>
+
+            <a href="/attendance">
+                勤怠
+            </a>
+
+            <a href="/attendance/list">
+                勤怠一覧
+            </a>
+
+            <a href="/request/list">
+                申請
+            </a>
+
+            <form method="POST" action="/logout">
+                @csrf
+
+                <button
+                    type="submit"
+                    class="header__logout"
+                >
+                    ログアウト
+                </button>
+            </form>
+
         </nav>
 
     </div>

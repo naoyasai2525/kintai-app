@@ -1,9 +1,9 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
 @section('title', '勤怠詳細')
 
 @section('css')
-<link rel="stylesheet" href="{{ asset('css/admin-attendance-detail.css') }}">
+<link rel="stylesheet" href="{{ asset('css/attendance-detail.css') }}">
 @endsection
 
 @section('content')
@@ -20,23 +20,23 @@
 
             <tr>
                 <th>名前</th>
-                <td>西 怜奈</td>
+                <td colspan="3">西 怜奈</td>
             </tr>
 
             <tr>
                 <th>日付</th>
-                <td class="attendance-detail__date">
-                    <span>2023年</span>
-                    <span>6月1日</span>
-                </td>
+                <td>2023年</td>
+                <td colspan="2">6月1日</td>
             </tr>
 
             <tr>
                 <th>出勤・退勤</th>
                 <td>
                     <input type="time" value="09:00">
-                    <span>～</span>
-                    <input type="time" value="20:00">
+                </td>
+                <td class="attendance-detail__wave">～</td>
+                <td>
+                    <input type="time" value="18:00">
                 </td>
             </tr>
 
@@ -44,7 +44,9 @@
                 <th>休憩</th>
                 <td>
                     <input type="time" value="12:00">
-                    <span>～</span>
+                </td>
+                <td class="attendance-detail__wave">～</td>
+                <td>
                     <input type="time" value="13:00">
                 </td>
             </tr>
@@ -53,21 +55,23 @@
                 <th>休憩2</th>
                 <td>
                     <input type="time">
-                    <span>～</span>
+                </td>
+                <td class="attendance-detail__wave">～</td>
+                <td>
                     <input type="time">
                 </td>
             </tr>
 
             <tr>
                 <th>備考</th>
-                <td>
-                    <textarea></textarea>
+                <td colspan="3">
+                    <textarea>電車遅延のため</textarea>
                 </td>
             </tr>
 
         </table>
 
-        <div class="attendance-detail__button-area">
+        <div class="attendance-detail__button">
             <button type="submit">
                 修正
             </button>
