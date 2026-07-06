@@ -18,6 +18,10 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/attendance/clock-out', [AttendanceController::class, 'clockOut']);
 
+    Route::post('/attendance/break-in',[AttendanceController::class, 'breakIn']);
+
+    Route::post('/attendance/break-out',[AttendanceController::class, 'breakOut']);
+
     Route::get('/attendance/list', function () {
         return view('attendance.list');
     });
