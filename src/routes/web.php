@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\Admin\AdminLoginController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('welcome');
@@ -53,9 +56,6 @@ Route::get('/register', function () {
 
 // ===== 管理者 =====
 
-Route::get('/admin/login', function () {
-    return view('admin.login');
-});
 
 Route::get('/admin/attendance/list', function () {
     return view('admin.attendance-list');
@@ -80,3 +80,23 @@ Route::get('/admin/request/list', function () {
 Route::get('/admin/request/detail', function () {
     return view('admin.request-detail');
 });
+
+Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm']);
+
+Route::post('/admin/login', [AdminLoginController::class, 'login']);
+
+Route::middleware('auth')->group(function () {
+
+    Route::post('/admin/logout', function (Request $request) {
+
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/admin/login');
+
+    })->name('admin.logout');
+
+});
+

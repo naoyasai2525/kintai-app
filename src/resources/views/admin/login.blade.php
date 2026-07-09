@@ -14,19 +14,50 @@
         管理者ログイン
     </h1>
 
-    <form class="admin-login__form">
+    <form
+        method="POST"
+        action="/admin/login"
+        class="admin-login__form"
+        novalidate
+    >
+
+        @csrf
 
         <div class="admin-login__group">
+
             <label>メールアドレス</label>
-            <input type="email">
+
+            <input
+                type="email"
+                name="email"
+                value="{{ old('email') }}"
+            >
+
+            @error('email')
+                <p>{{ $message }}</p>
+            @enderror
+
         </div>
 
         <div class="admin-login__group">
+
             <label>パスワード</label>
-            <input type="password">
+
+            <input
+                type="password"
+                name="password"
+            >
+
+            @error('password')
+                <p>{{ $message }}</p>
+            @enderror
+
         </div>
 
-        <button type="submit" class="admin-login__button">
+        <button
+            type="submit"
+            class="admin-login__button"
+        >
             管理者ログインする
         </button>
 

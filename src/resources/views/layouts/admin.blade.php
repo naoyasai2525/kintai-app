@@ -35,12 +35,13 @@
                     申請一覧
                 </a>
 
-                <form action="/logout" method="POST">
-                    @csrf
+                <form action="{{ route('admin.logout') }}" method="POST">
+    @csrf
 
-                    <button type="submit" class="header__logout">
-                        ログアウト
-                    </button>
+    <button type="submit" class="header__logout">
+        ログアウト
+    </button>
+</form>
 
                 </form>
 
