@@ -16,15 +16,21 @@
 
     <div class="attendance-list__month-nav">
 
-        <a href="#" class="attendance-list__prev">
+        <a
+            href="{{ url('/attendance/list?month=' . $currentMonth->copy()->subMonth()->format('Y-m')) }}"
+            class="attendance-list__prev"
+        >
             ← 前月
         </a>
 
         <div class="attendance-list__month">
-            📅 2023/06
+            📅 {{ $currentMonth->format('Y/m') }}
         </div>
 
-        <a href="#" class="attendance-list__next">
+        <a
+            href="{{ url('/attendance/list?month=' . $currentMonth->copy()->addMonth()->format('Y-m')) }}"
+            class="attendance-list__next"
+        >
             翌月 →
         </a>
 
@@ -35,6 +41,7 @@
         <table class="attendance-list__table">
 
             <thead>
+
                 <tr>
                     <th>日付</th>
                     <th>出勤</th>
@@ -43,36 +50,46 @@
                     <th>合計</th>
                     <th>詳細</th>
                 </tr>
+
             </thead>
 
             <tbody>
 
-                <tr>
-                    <td>06/01(木)</td>
-                    <td>09:00</td>
-                    <td>18:00</td>
-                    <td>1:00</td>
-                    <td>8:00</td>
-                    <td><a href="#">詳細</a></td>
-                </tr>
+                @foreach ($attendances as $attendance)
 
-                <tr>
-                    <td>06/02(金)</td>
-                    <td>09:00</td>
-                    <td>18:00</td>
-                    <td>1:00</td>
-                    <td>8:00</td>
-                    <td><a href="#">詳細</a></td>
-                </tr>
+                    <tr>
 
-                <tr>
-                    <td>06/03(土)</td>
-                    <td>09:00</td>
-                    <td>18:00</td>
-                    <td>1:00</td>
-                    <td>8:00</td>
-                    <td><a href="#">詳細</a></td>
-                </tr>
+                        <td>
+                            {{ \Carbon\Carbon::parse($attendance->work_date)->format('m/d(D)') }}
+                        </td>
+
+                        <td>
+                            {{ $attendance->clock_in ? \Carbon\Carbon::parse($attendance->clock_in)->format('H:i') : '' }}
+                        </td>
+
+                        <td>
+                            {{ $attendance->clock_out ? \Carbon\Carbon::parse($attendance->clock_out)->format('H:i') : '' }}
+                        </td>
+
+                        <td>
+                            {{ $attendance->getBreakTime() }}
+                        </td>
+
+                        <td>
+                            {{ $attendance->getWorkTime() }}
+                        </td>
+
+                        <td>
+
+                            <a href="{{ route('attendance.detail', $attendance) }}">
+                                詳細
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                @endforeach
 
             </tbody>
 

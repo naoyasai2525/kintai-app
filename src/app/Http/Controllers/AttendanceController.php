@@ -3,48 +3,49 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
-    {
+{
     public function index()
     {
-    $attendance = Attendance::where('user_id', Auth::id())
-        ->whereDate('work_date', today())
-        ->first();
+        $attendance = Attendance::where('user_id', Auth::id())
+            ->whereDate('work_date', today())
+            ->first();
 
-    $status = '勤務外';
+        $status = '勤務外';
 
-    if ($attendance) {
+        if ($attendance) {
 
-    $lastBreak = $attendance
-        ->breakTimes()
-        ->latest()
-        ->first();
+            $lastBreak = $attendance->breakTimes()
+                ->latest()
+                ->first();
 
-    if ($attendance->clock_out) {
+            if ($attendance->clock_out) {
 
-        $status = '退勤済';
+                $status = '退勤済';
 
-    } elseif (
-        $lastBreak &&
-        $lastBreak->break_start &&
-        !$lastBreak->break_end
-    ) {
+            } elseif (
+                $lastBreak &&
+                $lastBreak->break_start &&
+                !$lastBreak->break_end
+            ) {
 
-        $status = '休憩中';
+                $status = '休憩中';
 
-    } else {
+            } else {
 
-        $status = '出勤中';
-    }
-    }
+                $status = '出勤中';
 
-    return view('attendance.index', compact(
-        'attendance',
-        'status'
-    ));
+            }
+        }
 
+        return view('attendance.index', compact(
+            'attendance',
+            'status'
+        ));
     }
 
     public function clockIn()
@@ -54,11 +55,13 @@ class AttendanceController extends Controller
             ->first();
 
         if (!$todayAttendance) {
+
             Attendance::create([
                 'user_id' => Auth::id(),
                 'work_date' => today(),
                 'clock_in' => now(),
             ]);
+
         }
 
         return redirect()->back();
@@ -71,58 +74,84 @@ class AttendanceController extends Controller
             ->first();
 
         if ($attendance && !$attendance->clock_out) {
+
             $attendance->update([
                 'clock_out' => now(),
             ]);
+
         }
 
         return redirect()->back();
     }
 
     public function breakIn()
-{
-    $attendance = Attendance::where(
-        'user_id',
-        Auth::id()
-    )
-    ->whereDate('work_date', today())
-    ->first();
-
-    if ($attendance) {
-
-        $attendance->breakTimes()->create([
-            'break_start' => now(),
-        ]);
-    }
-
-    return redirect()->back();
-}
-
-public function breakOut()
-{
-    $attendance = Attendance::where(
-        'user_id',
-        Auth::id()
-    )
-    ->whereDate('work_date', today())
-    ->first();
-
-    if ($attendance) {
-
-        $break = $attendance
-            ->breakTimes()
-            ->whereNull('break_end')
-            ->latest()
+    {
+        $attendance = Attendance::where('user_id', Auth::id())
+            ->whereDate('work_date', today())
             ->first();
 
-        if ($break) {
+        if ($attendance) {
 
-            $break->update([
-                'break_end' => now(),
+            $attendance->breakTimes()->create([
+                'break_start' => now(),
             ]);
+
         }
+
+        return redirect()->back();
     }
 
-    return redirect()->back();
-}
+    public function breakOut()
+    {
+        $attendance = Attendance::where('user_id', Auth::id())
+            ->whereDate('work_date', today())
+            ->first();
+
+        if ($attendance) {
+
+            $break = $attendance->breakTimes()
+                ->whereNull('break_end')
+                ->latest()
+                ->first();
+
+            if ($break) {
+
+                $break->update([
+                    'break_end' => now(),
+                ]);
+
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    public function list(Request $request)
+    {
+        $currentMonth = Carbon::parse(
+            $request->month ?? now()
+        );
+
+        $attendances = Attendance::where('user_id', Auth::id())
+            ->whereYear('work_date', $currentMonth->year)
+            ->whereMonth('work_date', $currentMonth->month)
+            ->orderBy('work_date')
+            ->get();
+
+        return view('attendance.list', compact(
+            'attendances',
+            'currentMonth'
+        ));
+    }
+
+    public function detail(Attendance $attendance)
+    {
+        if ($attendance->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return view('attendance.detail', compact(
+            'attendance'
+        ));
+    }
 }
