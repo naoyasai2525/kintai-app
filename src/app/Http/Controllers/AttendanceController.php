@@ -144,14 +144,27 @@ class AttendanceController extends Controller
         ));
     }
 
-    public function detail(Attendance $attendance)
-    {
-        if ($attendance->user_id !== Auth::id()) {
-            abort(403);
-        }
 
-        return view('attendance.detail', compact(
-            'attendance'
-        ));
+    public function detail(Attendance $attendance)
+{
+    if ($attendance->user_id !== Auth::id()) {
+        abort(403);
     }
+
+    return view(
+        'attendance.detail',
+        compact('attendance')
+    );
+}
+
+
+public function update(Request $request, Attendance $attendance)
+{
+    if ($attendance->user_id !== Auth::id()) {
+        abort(403);
+    }
+
+    dd($request->all());
+}
+
 }

@@ -88,6 +88,11 @@ Route::get('/admin/attendance/detail', function () {
     return view('admin.attendance-detail');
 });
 
+Route::post('/attendance/detail/{attendance}', [
+    AttendanceController::class,
+    'update',
+])->name('attendance.update');
+
 Route::get('/admin/staff/list', function () {
     return view('admin.staff-list');
 });
