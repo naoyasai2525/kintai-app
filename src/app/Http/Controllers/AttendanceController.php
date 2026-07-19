@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AttendanceCorrectionRequest;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -144,27 +145,24 @@ class AttendanceController extends Controller
         ));
     }
 
-
     public function detail(Attendance $attendance)
-{
-    if ($attendance->user_id !== Auth::id()) {
-        abort(403);
+    {
+        if ($attendance->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return view(
+            'attendance.detail',
+            compact('attendance')
+        );
     }
 
-    return view(
-        'attendance.detail',
-        compact('attendance')
-    );
-}
-
-
-public function update(Request $request, Attendance $attendance)
+    public function update(
+    AttendanceCorrectionRequest $request,
+    Attendance $attendance
+)
 {
-    if ($attendance->user_id !== Auth::id()) {
-        abort(403);
-    }
-
-    dd($request->all());
+    dd('update');
 }
 
 }
