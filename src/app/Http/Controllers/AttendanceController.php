@@ -58,9 +58,9 @@ class AttendanceController extends Controller
         if (!$todayAttendance) {
 
             Attendance::create([
-                'user_id' => Auth::id(),
+                'user_id'   => Auth::id(),
                 'work_date' => today(),
-                'clock_in' => now(),
+                'clock_in'  => now(),
             ]);
 
         }
@@ -122,6 +122,7 @@ class AttendanceController extends Controller
                 ]);
 
             }
+
         }
 
         return redirect()->back();
@@ -158,11 +159,22 @@ class AttendanceController extends Controller
     }
 
     public function update(
-    AttendanceCorrectionRequest $request,
-    Attendance $attendance
-)
-{
-    dd('update');
-}
+        AttendanceCorrectionRequest $request,
+        Attendance $attendance
+    )
+    {
+        $attendance->update([
+            'clock_in' => Carbon::parse(
+                $attendance->work_date . ' ' . $request->clock_in
+            )->format('Y-m-d H:i:s'),
 
+            'clock_out' => Carbon::parse(
+                $attendance->work_date . ' ' . $request->clock_out
+            )->format('Y-m-d H:i:s'),
+        ]);
+
+        return redirect()
+            ->route('attendance.detail', $attendance)
+            ->with('success', '更新しました');
+    }
 }
