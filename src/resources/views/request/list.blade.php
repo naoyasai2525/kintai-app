@@ -43,18 +43,45 @@
 
             <tbody>
 
-                @for ($i = 0; $i < 8; $i++)
+                @forelse($requests as $request)
+
                 <tr>
-                    <td>承認待ち</td>
-                    <td>西 伶奈</td>
-                    <td>2023/06/01</td>
-                    <td>遅延のため</td>
-                    <td>2023/06/02</td>
                     <td>
-                        <a href="/request/detail">詳細</a>
+                        {{ $request->status == 'pending' ? '承認待ち' : '承認済み' }}
+                    </td>
+
+                    <td>
+                        {{ $request->attendance->user->name }}
+                    </td>
+
+                    <td>
+                        {{ \Carbon\Carbon::parse($request->attendance->work_date)->format('Y/m/d') }}
+                    </td>
+
+                    <td>
+                        {{ $request->note }}
+                    </td>
+
+                    <td>
+                        {{ $request->created_at->format('Y/m/d') }}
+                    </td>
+
+                    <td>
+                        <a href="/request/detail">
+                            詳細
+                        </a>
                     </td>
                 </tr>
-                @endfor
+
+                @empty
+
+                <tr>
+                    <td colspan="6" style="text-align:center;">
+                        申請はありません
+                    </td>
+                </tr>
+
+                @endforelse
 
             </tbody>
 

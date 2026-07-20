@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\RequestController;
 use App\Http\Controllers\Admin\AdminLoginController;
 
 Route::get('/', function () {
@@ -32,13 +33,20 @@ Route::middleware('auth')->group(function () {
         'detail',
     ])->name('attendance.detail');
 
+    Route::post('/attendance/detail/{attendance}', [
+        AttendanceController::class,
+        'update',
+    ])->name('attendance.update');
+
     Route::get('/attendance/detail/approved', function () {
         return view('attendance.detail-approved');
     });
 
-    Route::get('/request/list', function () {
-        return view('request.list');
-    });
+    // ★ここを変更
+    Route::get('/request/list', [
+        RequestController::class,
+        'index',
+    ])->name('request.list');
 
     Route::get('/request/detail', function () {
         return view('request.detail');
@@ -87,11 +95,6 @@ Route::get('/admin/attendance/list', function () {
 Route::get('/admin/attendance/detail', function () {
     return view('admin.attendance-detail');
 });
-
-Route::post('/attendance/detail/{attendance}', [
-    AttendanceController::class,
-    'update',
-])->name('attendance.update');
 
 Route::get('/admin/staff/list', function () {
     return view('admin.staff-list');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AttendanceCorrectionRequest;
 use App\Models\Attendance;
+use App\Models\AttendanceCorrectionRequest as AttendanceCorrection;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -163,18 +164,16 @@ class AttendanceController extends Controller
         Attendance $attendance
     )
     {
-        $attendance->update([
-            'clock_in' => Carbon::parse(
-                $attendance->work_date . ' ' . $request->clock_in
-            )->format('Y-m-d H:i:s'),
-
-            'clock_out' => Carbon::parse(
-                $attendance->work_date . ' ' . $request->clock_out
-            )->format('Y-m-d H:i:s'),
+        AttendanceCorrection::create([
+            'attendance_id' => $attendance->id,
+            'requested_clock_in' => $request->clock_in,
+            'requested_clock_out' => $request->clock_out,
+            'note' => $request->note,
+            'status' => 'pending',
         ]);
 
         return redirect()
             ->route('attendance.detail', $attendance)
-            ->with('success', '更新しました');
+            ->with('success', '修正申請を送信しました');
     }
 }

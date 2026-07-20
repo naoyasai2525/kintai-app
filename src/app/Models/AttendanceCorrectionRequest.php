@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Attendance;
 
 class AttendanceCorrectionRequest extends Model
 {
@@ -14,8 +13,9 @@ class AttendanceCorrectionRequest extends Model
         'attendance_id',
         'requested_clock_in',
         'requested_clock_out',
-        'reason',
+        'note',
         'status',
+        'approved_at',
     ];
 
     public function attendance()

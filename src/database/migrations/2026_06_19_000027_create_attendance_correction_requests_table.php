@@ -17,11 +17,11 @@ class CreateAttendanceCorrectionRequestsTable extends Migration
             $table->id();
 
             $table->foreignId('attendance_id')
-                ->constrained()
+                ->constrained('attendances')
                 ->onDelete('cascade');
 
-            $table->dateTime('requested_clock_in');
-            $table->dateTime('requested_clock_out')->nullable();
+            $table->time('requested_clock_in');
+            $table->time('requested_clock_out');
 
             $table->text('note');
 
