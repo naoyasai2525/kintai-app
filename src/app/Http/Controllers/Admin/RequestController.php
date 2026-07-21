@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\AttendanceCorrectionRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class RequestController extends Controller
 {
@@ -19,25 +19,18 @@ class RequestController extends Controller
         $requests = AttendanceCorrectionRequest::with([
             'attendance.user',
         ])
-            ->whereHas('attendance', function ($query) {
-                $query->where('user_id', Auth::id());
-            })
             ->where('status', $status)
             ->latest()
             ->get();
 
-        return view('request.list', compact(
+        return view('admin.request-list', compact(
             'requests',
             'status'
         ));
     }
 
     public function detail(AttendanceCorrectionRequest $request)
-{
-    if ($request->attendance->user_id !== Auth::id()) {
-        abort(403);
+    {
+    return view('admin.request-detail', compact('request'));
     }
-
-    return view('request.detail', compact('request'));
-}
 }

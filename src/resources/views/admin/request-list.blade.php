@@ -3,7 +3,7 @@
 @section('title', '申請一覧')
 
 @section('css')
-<link rel="stylesheet" href="{{ asset('css/list.css') }}">
+<link rel="stylesheet" href="{{ asset('css/request-list.css') }}">
 @endsection
 
 @section('content')
@@ -16,11 +16,17 @@
 
     <div class="request-list__tabs">
 
-        <a href="#" class="request-list__tab request-list__tab--active">
+        <a
+            href="{{ route('admin.request.list', ['status' => 'pending']) }}"
+            class="request-list__tab {{ $status === 'pending' ? 'request-list__tab--active' : '' }}"
+        >
             承認待ち
         </a>
 
-        <a href="#" class="request-list__tab">
+        <a
+            href="{{ route('admin.request.list', ['status' => 'approved']) }}"
+            class="request-list__tab {{ $status === 'approved' ? 'request-list__tab--active' : '' }}"
+        >
             承認済み
         </a>
 
@@ -43,38 +49,47 @@
 
             <tbody>
 
-                <tr>
-                    <td>承認待ち</td>
-                    <td>西 怜奈</td>
-                    <td>2023/06/01</td>
-                    <td>遅延のため</td>
-                    <td>2023/06/02</td>
-                    <td>
-                        <a href="#">詳細</a>
-                    </td>
-                </tr>
+                @forelse ($requests as $correctionRequest)
 
-                <tr>
-                    <td>承認待ち</td>
-                    <td>山田 太郎</td>
-                    <td>2023/06/01</td>
-                    <td>遅延のため</td>
-                    <td>2023/08/02</td>
-                    <td>
-                        <a href="#">詳細</a>
-                    </td>
-                </tr>
+                    <tr>
 
-                <tr>
-                    <td>承認待ち</td>
-                    <td>山田 花子</td>
-                    <td>2023/06/02</td>
-                    <td>遅延のため</td>
-                    <td>2023/07/02</td>
-                    <td>
-                        <a href="#">詳細</a>
-                    </td>
-                </tr>
+                        <td>
+                            {{ $correctionRequest->status === 'pending' ? '承認待ち' : '承認済み' }}
+                        </td>
+
+                        <td>
+                            {{ $correctionRequest->attendance->user->name }}
+                        </td>
+
+                        <td>
+                            {{ \Carbon\Carbon::parse($correctionRequest->attendance->work_date)->format('Y/m/d') }}
+                        </td>
+
+                        <td>
+                            {{ $correctionRequest->note }}
+                        </td>
+
+                        <td>
+                            {{ $correctionRequest->created_at->format('Y/m/d') }}
+                        </td>
+
+                        <td>
+                            <a href="{{ route('admin.request.detail', $correctionRequest) }}">詳細</a>
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+                        <td colspan="6" style="text-align: center;">
+                            {{ $status === 'pending'
+                                ? '承認待ちの申請はありません'
+                                : '承認済みの申請はありません' }}
+                        </td>
+                    </tr>
+
+                @endforelse
 
             </tbody>
 

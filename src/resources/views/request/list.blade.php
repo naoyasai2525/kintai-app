@@ -16,11 +16,19 @@
 
     <div class="request__tab">
 
-        <a href="#" class="request__tab-item request__tab-item--active">
+        <a
+            href="{{ route('request.list', ['status' => 'pending']) }}"
+            class="request__tab-item
+                {{ $status === 'pending' ? 'request__tab-item--active' : '' }}"
+        >
             承認待ち
         </a>
 
-        <a href="#" class="request__tab-item">
+        <a
+            href="{{ route('request.list', ['status' => 'approved']) }}"
+            class="request__tab-item
+                {{ $status === 'approved' ? 'request__tab-item--active' : '' }}"
+        >
             承認済み
         </a>
 
@@ -43,43 +51,49 @@
 
             <tbody>
 
-                @forelse($requests as $request)
+                @forelse ($requests as $correctionRequest)
 
-                <tr>
-                    <td>
-                        {{ $request->status == 'pending' ? '承認待ち' : '承認済み' }}
-                    </td>
+                    <tr>
+                        <td>
+                            {{ $correctionRequest->status === 'pending'
+                                ? '承認待ち'
+                                : '承認済み' }}
+                        </td>
 
-                    <td>
-                        {{ $request->attendance->user->name }}
-                    </td>
+                        <td>
+                            {{ $correctionRequest->attendance->user->name }}
+                        </td>
 
-                    <td>
-                        {{ \Carbon\Carbon::parse($request->attendance->work_date)->format('Y/m/d') }}
-                    </td>
+                        <td>
+                            {{ \Carbon\Carbon::parse(
+                                $correctionRequest->attendance->work_date
+                            )->format('Y/m/d') }}
+                        </td>
 
-                    <td>
-                        {{ $request->note }}
-                    </td>
+                        <td>
+                            {{ $correctionRequest->note }}
+                        </td>
 
-                    <td>
-                        {{ $request->created_at->format('Y/m/d') }}
-                    </td>
+                        <td>
+                            {{ $correctionRequest->created_at->format('Y/m/d') }}
+                        </td>
 
-                    <td>
-                        <a href="/request/detail">
-                            詳細
-                        </a>
-                    </td>
-                </tr>
+                        <td>
+                            <a href="{{ route('request.detail', $correctionRequest) }}">
+                                詳細
+                            </a>
+                        </td>
+                    </tr>
 
                 @empty
 
-                <tr>
-                    <td colspan="6" style="text-align:center;">
-                        申請はありません
-                    </td>
-                </tr>
+                    <tr>
+                        <td colspan="6" style="text-align: center;">
+                            {{ $status === 'pending'
+                                ? '承認待ちの申請はありません'
+                                : '承認済みの申請はありません' }}
+                        </td>
+                    </tr>
 
                 @endforelse
 

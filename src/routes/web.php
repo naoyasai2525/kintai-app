@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\Admin\AdminLoginController;
+use App\Http\Controllers\Admin\RequestController as AdminRequestController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -42,15 +43,15 @@ Route::middleware('auth')->group(function () {
         return view('attendance.detail-approved');
     });
 
-    // ★ここを変更
     Route::get('/request/list', [
         RequestController::class,
         'index',
     ])->name('request.list');
 
-    Route::get('/request/detail', function () {
-        return view('request.detail');
-    });
+    Route::get('/request/detail/{request}', [
+        RequestController::class,
+        'detail',
+    ])->name('request.detail');
 
     Route::get('/report', function () {
         return view('report.index');
@@ -104,10 +105,12 @@ Route::get('/admin/staff/attendance/list', function () {
     return view('admin.staff-attendance-list');
 });
 
-Route::get('/admin/request/list', function () {
-    return view('admin.request-list');
-});
+Route::get('/admin/request/list', [
+    AdminRequestController::class,
+    'index',
+])->name('admin.request.list');
 
-Route::get('/admin/request/detail', function () {
-    return view('admin.request-detail');
-});
+Route::get('/admin/request/detail/{request}', [
+    AdminRequestController::class,
+    'detail',
+])->name('admin.request.detail');
