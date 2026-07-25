@@ -31,6 +31,28 @@ class RequestController extends Controller
 
     public function detail(AttendanceCorrectionRequest $request)
     {
-    return view('admin.request-detail', compact('request'));
+        $request->load([
+            'attendance.user',
+            'attendance.breakTimes',
+        ]);
+
+        return view('admin.request-detail', compact('request'));
+    }
+
+    public function approve(AttendanceCorrectionRequest $request)
+    {
+        $request->attendance->update([
+            'clock_in' => $request->attendance->work_date . ' ' . $request->requested_clock_in,
+            'clock_out' => $request->attendance->work_date . ' ' . $request->requested_clock_out,
+        ]);
+
+        $request->update([
+            'status' => 'approved',
+            'approved_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('admin.request.detail', $request)
+            ->with('success', '申請を承認しました。');
     }
 }

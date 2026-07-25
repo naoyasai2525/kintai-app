@@ -34,10 +34,12 @@ class RequestController extends Controller
 
     public function detail(AttendanceCorrectionRequest $request)
 {
-    if ($request->attendance->user_id !== Auth::id()) {
-        abort(403);
-    }
+    $request->load([
+        'attendance.user',
+        'attendance.breakTimes',
+    ]);
 
-    return view('request.detail', compact('request'));
+    return view('admin.request-detail', compact('request'));
 }
+
 }

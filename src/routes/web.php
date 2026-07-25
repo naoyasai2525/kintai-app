@@ -114,3 +114,8 @@ Route::get('/admin/request/detail/{request}', [
     AdminRequestController::class,
     'detail',
 ])->name('admin.request.detail');
+
+Route::post('/admin/request/approve/{request}', [
+    AdminRequestController::class,
+    'approve',
+])->name('admin.request.approve');

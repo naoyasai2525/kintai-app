@@ -14,6 +14,12 @@
         申請詳細
     </h1>
 
+    @if(session('success'))
+        <p class="success-message">
+            {{ session('success') }}
+        </p>
+    @endif
+
     <table class="request-detail__table">
 
         <tr>
@@ -50,19 +56,31 @@
             </td>
         </tr>
 
+        @forelse($request->attendance->breakTimes as $index => $breakTime)
+        <tr>
+            <th>
+                {{ $index === 0 ? '休憩' : '休憩' . ($index + 1) }}
+            </th>
+            <td>
+                <span>
+                    {{ \Carbon\Carbon::parse($breakTime->break_start)->format('H:i') }}
+                </span>
+
+                <span class="request-detail__separator">～</span>
+
+                <span>
+                    {{ $breakTime->break_end
+                        ? \Carbon\Carbon::parse($breakTime->break_end)->format('H:i')
+                        : '' }}
+                </span>
+            </td>
+        </tr>
+        @empty
         <tr>
             <th>休憩</th>
-            <td>
-                -
-            </td>
+            <td>-</td>
         </tr>
-
-        <tr>
-            <th>休憩2</th>
-            <td>
-                -
-            </td>
-        </tr>
+        @endforelse
 
         <tr>
             <th>備考</th>
@@ -74,9 +92,25 @@
     </table>
 
     <div class="request-detail__button">
-        <button type="button">
-            承認
-        </button>
+
+        @if($request->status === 'pending')
+
+            <form action="{{ route('admin.request.approve', $request) }}" method="POST">
+                @csrf
+
+                <button type="submit">
+                    承認
+                </button>
+            </form>
+
+        @else
+
+            <button type="button" disabled>
+                承認済み
+            </button>
+
+        @endif
+
     </div>
 
 </div>
