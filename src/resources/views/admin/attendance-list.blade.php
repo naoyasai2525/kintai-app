@@ -11,20 +11,30 @@
 <div class="attendance-list">
 
     <h1 class="attendance-list__title">
-        2023年6月1日の勤怠
+        {{ $currentDate->format('Y年n月j日') }}の勤怠
     </h1>
 
     <div class="attendance-list__date-nav">
 
-        <a href="#" class="attendance-list__prev">
+        <a
+            href="{{ route('admin.attendance.list', [
+                'date' => $currentDate->copy()->subDay()->format('Y-m-d')
+            ]) }}"
+            class="attendance-list__prev"
+        >
             ← 前日
         </a>
 
         <div class="attendance-list__date">
-            📅 2023/06/01
+            📅 {{ $currentDate->format('Y/m/d') }}
         </div>
 
-        <a href="#" class="attendance-list__next">
+        <a
+            href="{{ route('admin.attendance.list', [
+                'date' => $currentDate->copy()->addDay()->format('Y-m-d')
+            ]) }}"
+            class="attendance-list__next"
+        >
             翌日 →
         </a>
 
@@ -47,23 +57,50 @@
 
             <tbody>
 
-                <tr>
-                    <td>山田 太郎</td>
-                    <td>09:00</td>
-                    <td>18:00</td>
-                    <td>1:00</td>
-                    <td>8:00</td>
-                    <td><a href="#">詳細</a></td>
-                </tr>
+                @forelse($attendances as $attendance)
 
-                <tr>
-                    <td>田中 花子</td>
-                    <td>09:00</td>
-                    <td>18:00</td>
-                    <td>1:00</td>
-                    <td>8:00</td>
-                    <td><a href="#">詳細</a></td>
-                </tr>
+                    <tr>
+                        <td>
+                            {{ $attendance->user->name }}
+                        </td>
+
+                        <td>
+                            {{ $attendance->clock_in
+                                ? \Carbon\Carbon::parse($attendance->clock_in)->format('H:i')
+                                : '' }}
+                        </td>
+
+                        <td>
+                            {{ $attendance->clock_out
+                                ? \Carbon\Carbon::parse($attendance->clock_out)->format('H:i')
+                                : '' }}
+                        </td>
+
+                        <td>
+                            {{ $attendance->getBreakTime() }}
+                        </td>
+
+                        <td>
+                            {{ $attendance->getWorkTime() }}
+                        </td>
+
+                        <td>
+                            <a href="{{ route('admin.attendance.detail', $attendance) }}">
+                                詳細
+                            </a>
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+                        <td colspan="6">
+                            この日の勤怠データはありません
+                        </td>
+                    </tr>
+
+                @endforelse
 
             </tbody>
 

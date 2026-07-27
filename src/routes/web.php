@@ -7,6 +7,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\Admin\RequestController as AdminRequestController;
+use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -87,15 +88,43 @@ Route::middleware('auth')->group(function () {
         return redirect('/admin/login');
 
     })->name('admin.logout');
+
+    // ===== 管理者勤怠 =====
+
+    Route::get('/admin/attendance/list', [
+        AdminAttendanceController::class,
+        'index',
+    ])->name('admin.attendance.list');
+
+    Route::get('/admin/attendance/detail/{attendance}', [
+        AdminAttendanceController::class,
+        'detail',
+    ])->name('admin.attendance.detail');
+
+    Route::post('/admin/attendance/detail/{attendance}', [
+        AdminAttendanceController::class,
+        'update',
+    ])->name('admin.attendance.update');
+
+    // ===== 修正申請 =====
+
+    Route::get('/admin/request/list', [
+        AdminRequestController::class,
+        'index',
+    ])->name('admin.request.list');
+
+    Route::get('/admin/request/detail/{request}', [
+        AdminRequestController::class,
+        'detail',
+    ])->name('admin.request.detail');
+
+    Route::post('/admin/request/approve/{request}', [
+        AdminRequestController::class,
+        'approve',
+    ])->name('admin.request.approve');
 });
 
-Route::get('/admin/attendance/list', function () {
-    return view('admin.attendance-list');
-});
-
-Route::get('/admin/attendance/detail', function () {
-    return view('admin.attendance-detail');
-});
+// ===== 画面のみ =====
 
 Route::get('/admin/staff/list', function () {
     return view('admin.staff-list');
@@ -104,18 +133,3 @@ Route::get('/admin/staff/list', function () {
 Route::get('/admin/staff/attendance/list', function () {
     return view('admin.staff-attendance-list');
 });
-
-Route::get('/admin/request/list', [
-    AdminRequestController::class,
-    'index',
-])->name('admin.request.list');
-
-Route::get('/admin/request/detail/{request}', [
-    AdminRequestController::class,
-    'detail',
-])->name('admin.request.detail');
-
-Route::post('/admin/request/approve/{request}', [
-    AdminRequestController::class,
-    'approve',
-])->name('admin.request.approve');
