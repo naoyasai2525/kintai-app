@@ -28,45 +28,39 @@
 
             <tbody>
 
-                <tr>
-                    <td>西 怜奈</td>
-                    <td>reina.n@coachtech.com</td>
-                    <td>
-                        <a href="#">詳細</a>
-                    </td>
-                </tr>
+                @forelse($users as $user)
 
-                <tr>
-                    <td>山田 太郎</td>
-                    <td>taro.y@coachtech.com</td>
-                    <td>
-                        <a href="#">詳細</a>
-                    </td>
-                </tr>
+                    <tr>
 
-                <tr>
-                    <td>増田 一生</td>
-                    <td>issei.m@coachtech.com</td>
-                    <td>
-                        <a href="#">詳細</a>
-                    </td>
-                </tr>
+                        <td>
+                            {{ $user->name }}
+                        </td>
 
-                <tr>
-                    <td>山本 敬吉</td>
-                    <td>keikichi.y@coachtech.com</td>
-                    <td>
-                        <a href="#">詳細</a>
-                    </td>
-                </tr>
+                        <td>
+                            {{ $user->email }}
+                        </td>
 
-                <tr>
-                    <td>秋田 朋美</td>
-                    <td>tomomi.a@coachtech.com</td>
-                    <td>
-                        <a href="#">詳細</a>
-                    </td>
-                </tr>
+                        <td>
+                            <a
+                                href="{{ route('admin.staff.attendance.list', $user) }}"
+                            >
+                                詳細
+                            </a>
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+
+                        <td colspan="3">
+                            スタッフが登録されていません
+                        </td>
+
+                    </tr>
+
+                @endforelse
 
             </tbody>
 

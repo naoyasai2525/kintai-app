@@ -8,6 +8,7 @@ use App\Http\Controllers\RequestController;
 use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\Admin\RequestController as AdminRequestController;
 use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController;
+use App\Http\Controllers\Admin\StaffController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -133,3 +134,18 @@ Route::get('/admin/staff/list', function () {
 Route::get('/admin/staff/attendance/list', function () {
     return view('admin.staff-attendance-list');
 });
+
+Route::get('/admin/staff/list', [
+    StaffController::class,
+    'index',
+])->name('admin.staff.list');
+
+Route::get('/admin/staff/attendance/list/{user}', [
+    StaffController::class,
+    'attendanceList',
+])->name('admin.staff.attendance.list');
+
+Route::get('/admin/staff/attendance/csv/{user}', [
+    StaffController::class,
+    'exportCsv',
+])->name('admin.staff.attendance.csv');

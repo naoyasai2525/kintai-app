@@ -11,20 +11,32 @@
 <div class="staff-attendance">
 
     <h1 class="staff-attendance__title">
-        西玲奈さんの勤怠
+        {{ $user->name }}さんの勤怠
     </h1>
 
     <div class="staff-attendance__month-nav">
 
-        <a href="#" class="staff-attendance__prev">
+        <a
+            href="{{ route('admin.staff.attendance.list', [
+                'user' => $user,
+                'month' => $currentMonth->copy()->subMonth()->format('Y-m')
+            ]) }}"
+            class="staff-attendance__prev"
+        >
             ← 前月
         </a>
 
         <div class="staff-attendance__month">
-            📅 2023/06
+            📅 {{ $currentMonth->format('Y/m') }}
         </div>
 
-        <a href="#" class="staff-attendance__next">
+        <a
+            href="{{ route('admin.staff.attendance.list', [
+                'user' => $user,
+                'month' => $currentMonth->copy()->addMonth()->format('Y-m')
+            ]) }}"
+            class="staff-attendance__next"
+        >
             翌月 →
         </a>
 
@@ -47,25 +59,55 @@
 
             <tbody>
 
-                <tr>
-                    <td>06/01(木)</td>
-                    <td>09:00</td>
-                    <td>18:00</td>
-                    <td>1:00</td>
-                    <td>8:00</td>
-                    <td><a href="#">詳細</a></td>
-                </tr>
+                @forelse($attendances as $attendance)
 
-                <tr>
-                    <td>06/02(金)</td>
-                    <td>09:00</td>
-                    <td>18:00</td>
-                    <td>1:00</td>
-                    <td>8:00</td>
-                    <td><a href="#">詳細</a></td>
-                </tr>
+                    <tr>
 
-                <!-- 後でforeach化 -->
+                        <td>
+                            {{ \Carbon\Carbon::parse($attendance->work_date)->format('m/d(D)') }}
+                        </td>
+
+                        <td>
+                            {{ $attendance->clock_in
+                                ? \Carbon\Carbon::parse($attendance->clock_in)->format('H:i')
+                                : '' }}
+                        </td>
+
+                        <td>
+                            {{ $attendance->clock_out
+                                ? \Carbon\Carbon::parse($attendance->clock_out)->format('H:i')
+                                : '' }}
+                        </td>
+
+                        <td>
+                            {{ $attendance->getBreakTime() }}
+                        </td>
+
+                        <td>
+                            {{ $attendance->getWorkTime() }}
+                        </td>
+
+                        <td>
+                            <a
+                                href="{{ route('admin.attendance.detail', $attendance) }}"
+                            >
+                                詳細
+                            </a>
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+
+                        <td colspan="6">
+                            勤怠データがありません
+                        </td>
+
+                    </tr>
+
+                @endforelse
 
             </tbody>
 
@@ -74,9 +116,18 @@
     </div>
 
     <div class="staff-attendance__button">
-        <button type="button">
-            CSV出力
-        </button>
+
+    <a
+    href="{{ route('admin.staff.attendance.csv', [
+        'user' => $user,
+        'month' => $currentMonth->format('Y-m')
+    ]) }}"
+    class="staff-attendance__csv-button"
+>
+    CSV出力
+</a>
+
+
     </div>
 
 </div>
