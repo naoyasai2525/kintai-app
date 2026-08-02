@@ -6,26 +6,17 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class AttendanceCorrectionRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
     public function authorize()
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function rules()
     {
         return [
             'clock_in' => [
                 'required',
+                'before:clock_out',
             ],
 
             'clock_out' => [
@@ -42,10 +33,11 @@ class AttendanceCorrectionRequest extends FormRequest
     {
         return [
             'clock_in.required' => '出勤時間を入力してください',
+            'clock_in.before' => '出勤時間もしくは退勤時間が不適切な値です',
 
             'clock_out.required' => '退勤時間を入力してください',
 
-            'note.required' => '備考を入力してください',
+            'note.required' => '備考を記入してください',
         ];
     }
 }
