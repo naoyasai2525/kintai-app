@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\Contracts\LogoutResponse;
-use App\Http\Requests\LoginRequest;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -32,69 +31,95 @@ class FortifyServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
     public function boot(): void
-{
-    Fortify::loginView(function () {
-        return view('auth.login');
-    });
+    {
+        // ログイン画面
+        Fortify::loginView(function () {
+            return view('auth.login');
+        });
 
-    Fortify::registerView(function () {
-        return view('auth.register');
-    });
+        // 会員登録画面
+        Fortify::registerView(function () {
+            return view('auth.register');
+        });
 
-    Fortify::authenticateUsing(function (Request $request) {
+        // メール認証案内画面
+        Fortify::verifyEmailView(function () {
+            return view('auth.verify-email');
+        });
 
-    validator(
-        $request->all(),
-        [
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ],
-        [
-            'email.required' => 'メールアドレスを入力してください',
-            'email.email' => 'メールアドレスはメール形式で入力してください',
-            'password.required' => 'パスワードを入力してください',
-        ]
-    )->validate();
+        // ログイン認証
+        Fortify::authenticateUsing(function (Request $request) {
 
-    $user = Auth::getProvider()->retrieveByCredentials([
-        'email' => $request->email,
-    ]);
+            validator(
+                $request->all(),
+                [
+                    'email' => ['required', 'email'],
+                    'password' => ['required'],
+                ],
+                [
+                    'email.required' => 'メールアドレスを入力してください',
+                    'email.email' => 'メールアドレスはメール形式で入力してください',
+                    'password.required' => 'パスワードを入力してください',
+                ]
+            )->validate();
 
-    if ($user && Hash::check($request->password, $user->password)) {
-        return $user;
-    }
+            $user = Auth::getProvider()->retrieveByCredentials([
+                'email' => $request->email,
+            ]);
 
-    throw ValidationException::withMessages([
-        'email' => 'ログイン情報が登録されていません',
-    ]);
-});
+            if ($user && Hash::check($request->password, $user->password)) {
+                return $user;
+            }
 
- 
+            throw ValidationException::withMessages([
+                'email' => 'ログイン情報が登録されていません',
+            ]);
+        });
 
+        // Fortify Actions
+        Fortify::createUsersUsing(CreateNewUser::class);
 
-    Fortify::createUsersUsing(CreateNewUser::class);
-    Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
-    Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
-    Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
-
-    RateLimiter::for('login', function (Request $request) {
-        $throttleKey = Str::transliterate(
-            Str::lower($request->input(Fortify::username())) . '|' . $request->ip()
+        Fortify::updateUserProfileInformationUsing(
+            UpdateUserProfileInformation::class
         );
 
-        return Limit::perMinute(5)->by($throttleKey);
-    });
+        Fortify::updateUserPasswordsUsing(
+            UpdateUserPassword::class
+        );
 
-    RateLimiter::for('two-factor', function (Request $request) {
-        return Limit::perMinute(5)->by($request->session()->get('login.id'));
-    });
+        Fortify::resetUserPasswordsUsing(
+            ResetUserPassword::class
+        );
 
-    $this->app->instance(LogoutResponse::class, new class implements LogoutResponse {
-    public function toResponse($request)
-    {
-        return redirect('/login');
+        // ログイン試行回数制限
+        RateLimiter::for('login', function (Request $request) {
+
+            $throttleKey = Str::transliterate(
+                Str::lower(
+                    $request->input(Fortify::username())
+                ) . '|' . $request->ip()
+            );
+
+            return Limit::perMinute(5)->by($throttleKey);
+        });
+
+        // 二段階認証用
+        RateLimiter::for('two-factor', function (Request $request) {
+
+            return Limit::perMinute(5)->by(
+                $request->session()->get('login.id')
+            );
+        });
+
+        // ログアウト後
+        $this->app->instance(
+            LogoutResponse::class,
+            new class implements LogoutResponse {
+                public function toResponse($request)
+                {
+                    return redirect('/login');
+                }
+            }
+        );
     }
-    });
-}
-
 }
