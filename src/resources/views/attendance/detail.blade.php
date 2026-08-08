@@ -24,6 +24,7 @@
 
             <tr>
                 <th>名前</th>
+
                 <td colspan="3">
                     {{ $attendance->user->name }}
                 </td>
@@ -31,9 +32,11 @@
 
             <tr>
                 <th>日付</th>
+
                 <td>
                     {{ \Carbon\Carbon::parse($attendance->work_date)->format('Y年') }}
                 </td>
+
                 <td colspan="2">
                     {{ \Carbon\Carbon::parse($attendance->work_date)->format('n月j日') }}
                 </td>
@@ -41,13 +44,17 @@
 
             <tr>
                 <th>出勤</th>
+
                 <td colspan="3">
                     <input
                         type="time"
                         name="clock_in"
-                        value="{{ $attendance->clock_in
-                            ? \Carbon\Carbon::parse($attendance->clock_in)->format('H:i')
-                            : '' }}"
+                        value="{{ old(
+                            'clock_in',
+                            $attendance->clock_in
+                                ? \Carbon\Carbon::parse($attendance->clock_in)->format('H:i')
+                                : ''
+                        ) }}"
                     >
 
                     @error('clock_in')
@@ -60,13 +67,17 @@
 
             <tr>
                 <th>退勤</th>
+
                 <td colspan="3">
                     <input
                         type="time"
                         name="clock_out"
-                        value="{{ $attendance->clock_out
-                            ? \Carbon\Carbon::parse($attendance->clock_out)->format('H:i')
-                            : '' }}"
+                        value="{{ old(
+                            'clock_out',
+                            $attendance->clock_out
+                                ? \Carbon\Carbon::parse($attendance->clock_out)->format('H:i')
+                                : ''
+                        ) }}"
                     >
 
                     @error('clock_out')
@@ -88,46 +99,90 @@
                         <input
                             type="time"
                             name="breaks[{{ $index }}][break_start]"
-                            value="{{ $break->break_start
-                                ? \Carbon\Carbon::parse($break->break_start)->format('H:i')
-                                : '' }}"
+                            value="{{ old(
+                                'breaks.' . $index . '.break_start',
+                                $break->break_start
+                                    ? \Carbon\Carbon::parse($break->break_start)->format('H:i')
+                                    : ''
+                            ) }}"
                         >
+
+                        @error('breaks.' . $index . '.break_start')
+                            <p class="attendance-detail__error">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </td>
 
-                    <td>〜</td>
+                    <td class="attendance-detail__wave">
+                        〜
+                    </td>
 
                     <td>
                         <input
                             type="time"
                             name="breaks[{{ $index }}][break_end]"
-                            value="{{ $break->break_end
-                                ? \Carbon\Carbon::parse($break->break_end)->format('H:i')
-                                : '' }}"
+                            value="{{ old(
+                                'breaks.' . $index . '.break_end',
+                                $break->break_end
+                                    ? \Carbon\Carbon::parse($break->break_end)->format('H:i')
+                                    : ''
+                            ) }}"
                         >
+
+                        @error('breaks.' . $index . '.break_end')
+                            <p class="attendance-detail__error">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </td>
                 </tr>
 
             @endforeach
 
+            @php
+                $newBreakIndex = $attendance->breakTimes->count();
+            @endphp
+
             <tr>
                 <th>
-                    休憩{{ $attendance->breakTimes->count() + 1 }}
+                    休憩{{ $newBreakIndex + 1 }}
                 </th>
 
                 <td>
                     <input
                         type="time"
-                        name="breaks[{{ $attendance->breakTimes->count() }}][break_start]"
+                        name="breaks[{{ $newBreakIndex }}][break_start]"
+                        value="{{ old(
+                            'breaks.' . $newBreakIndex . '.break_start'
+                        ) }}"
                     >
+
+                    @error('breaks.' . $newBreakIndex . '.break_start')
+                        <p class="attendance-detail__error">
+                            {{ $message }}
+                        </p>
+                    @enderror
                 </td>
 
-                <td>〜</td>
+                <td class="attendance-detail__wave">
+                    〜
+                </td>
 
                 <td>
                     <input
                         type="time"
-                        name="breaks[{{ $attendance->breakTimes->count() }}][break_end]"
+                        name="breaks[{{ $newBreakIndex }}][break_end]"
+                        value="{{ old(
+                            'breaks.' . $newBreakIndex . '.break_end'
+                        ) }}"
                     >
+
+                    @error('breaks.' . $newBreakIndex . '.break_end')
+                        <p class="attendance-detail__error">
+                            {{ $message }}
+                        </p>
+                    @enderror
                 </td>
             </tr>
 

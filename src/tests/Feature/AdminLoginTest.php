@@ -55,4 +55,26 @@ class AdminLoginTest extends TestCase
             'email' => 'ログイン情報が登録されていません',
         ]);
     }
+
+    /** @test */
+    public function general_user_cannot_login_as_admin()
+    {
+        User::factory()->create([
+            'name' => '一般ユーザー',
+            'email' => 'user@example.com',
+            'password' => bcrypt('password'),
+            'is_admin' => false,
+        ]);
+
+        $response = $this->post('/admin/login', [
+            'email' => 'user@example.com',
+            'password' => 'password',
+        ]);
+
+        $response->assertSessionHasErrors([
+            'email' => 'ログイン情報が登録されていません',
+        ]);
+
+        $this->assertGuest();
+    }
 }

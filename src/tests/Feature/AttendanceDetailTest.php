@@ -119,7 +119,115 @@ class AttendanceDetailTest extends TestCase
         );
 
         $response->assertSessionHasErrors([
-            'clock_in' => '出勤時間もしくは退勤時間が不適切な値です',
+            'clock_in' =>
+                '出勤時間もしくは退勤時間が不適切な値です',
         ]);
+    }
+
+    /** @test */
+    public function break_start_cannot_be_before_clock_in()
+    {
+        $user = User::factory()->create();
+
+        $attendance = Attendance::create([
+            'user_id' => $user->id,
+            'work_date' => today(),
+            'clock_in' => now()->setTime(9, 0),
+            'clock_out' => now()->setTime(18, 0),
+        ]);
+
+        $response = $this->actingAs($user)->post(
+            "/attendance/detail/{$attendance->id}",
+            [
+                'clock_in' => '09:00',
+                'clock_out' => '18:00',
+                'breaks' => [
+                    [
+                        'break_start' => '08:00',
+                        'break_end' => '10:00',
+                    ],
+                ],
+                'note' => 'テスト',
+            ]
+        );
+
+        $response->assertSessionHasErrors([
+            'breaks.0.break_start' =>
+                '休憩時間が不適切な値です',
+        ]);
+    }
+
+    /** @test */
+    public function break_end_cannot_be_after_clock_out()
+    {
+        $user = User::factory()->create();
+
+        $attendance = Attendance::create([
+            'user_id' => $user->id,
+            'work_date' => today(),
+            'clock_in' => now()->setTime(9, 0),
+            'clock_out' => now()->setTime(18, 0),
+        ]);
+
+        $response = $this->actingAs($user)->post(
+            "/attendance/detail/{$attendance->id}",
+            [
+                'clock_in' => '09:00',
+                'clock_out' => '18:00',
+                'breaks' => [
+                    [
+                        'break_start' => '17:00',
+                        'break_end' => '19:00',
+                    ],
+                ],
+                'note' => 'テスト',
+            ]
+        );
+
+        $response->assertSessionHasErrors([
+            'breaks.0.break_end' =>
+                '休憩時間もしくは退勤時間が不適切な値です',
+        ]);
+    }
+
+    /** @test */
+    public function correction_request_can_be_created()
+    {
+        $user = User::factory()->create();
+
+        $attendance = Attendance::create([
+            'user_id' => $user->id,
+            'work_date' => today(),
+            'clock_in' => now()->setTime(9, 0),
+            'clock_out' => now()->setTime(18, 0),
+        ]);
+
+        $response = $this->actingAs($user)->post(
+            "/attendance/detail/{$attendance->id}",
+            [
+                'clock_in' => '09:30',
+                'clock_out' => '18:30',
+                'breaks' => [
+                    [
+                        'break_start' => '12:00',
+                        'break_end' => '13:00',
+                    ],
+                ],
+                'note' => '電車遅延のため',
+            ]
+        );
+
+        $response->assertStatus(302);
+
+        $this->assertDatabaseHas(
+            'attendance_correction_requests',
+            [
+                'attendance_id' => $attendance->id,
+                'requested_clock_in' => '09:30:00',
+                'requested_clock_out' => '18:30:00',
+                'note' => '電車遅延のため',
+                'status' => 'pending',
+            ]
+        );
     }
 }

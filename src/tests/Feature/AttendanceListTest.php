@@ -53,10 +53,19 @@ class AttendanceListTest extends TestCase
     {
         $user = User::factory()->create();
 
+        $previousMonth = now()->subMonth();
+
         $response = $this->actingAs($user)
-            ->get('/attendance/list?month=' . now()->subMonth()->format('Y-m'));
+            ->get(
+                '/attendance/list?month=' .
+                $previousMonth->format('Y-m')
+            );
 
         $response->assertStatus(200);
+
+        $response->assertSee(
+            $previousMonth->format('Y/m')
+        );
     }
 
     /** @test */
@@ -64,10 +73,19 @@ class AttendanceListTest extends TestCase
     {
         $user = User::factory()->create();
 
+        $nextMonth = now()->addMonth();
+
         $response = $this->actingAs($user)
-            ->get('/attendance/list?month=' . now()->addMonth()->format('Y-m'));
+            ->get(
+                '/attendance/list?month=' .
+                $nextMonth->format('Y-m')
+            );
 
         $response->assertStatus(200);
+
+        $response->assertSee(
+            $nextMonth->format('Y/m')
+        );
     }
 
     /** @test */
@@ -85,5 +103,68 @@ class AttendanceListTest extends TestCase
             ->get("/attendance/detail/{$attendance->id}");
 
         $response->assertStatus(200);
+    }
+
+    /** @test */
+    public function other_users_attendance_is_not_displayed()
+    {
+        $user = User::factory()->create();
+
+        $otherUser = User::factory()->create();
+
+        Attendance::create([
+            'user_id' => $user->id,
+            'work_date' => today(),
+            'clock_in' => today()->setTime(9, 0),
+            'clock_out' => today()->setTime(18, 0),
+        ]);
+
+        Attendance::create([
+            'user_id' => $otherUser->id,
+            'work_date' => today()->subDay(),
+            'clock_in' => today()->subDay()->setTime(10, 0),
+            'clock_out' => today()->subDay()->setTime(17, 0),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get('/attendance/list');
+
+        $response->assertStatus(200);
+
+        $response->assertSee(
+            today()->format('m/d')
+        );
+
+        $response->assertDontSee(
+            today()->subDay()->format('m/d')
+        );
+    }
+
+    /** @test */
+    public function attendance_times_are_displayed_correctly()
+    {
+        $user = User::factory()->create();
+
+        $attendance = Attendance::create([
+            'user_id' => $user->id,
+            'work_date' => today(),
+            'clock_in' => today()->setTime(9, 0),
+            'clock_out' => today()->setTime(18, 0),
+        ]);
+
+        $attendance->breakTimes()->create([
+            'break_start' => today()->setTime(12, 0),
+            'break_end' => today()->setTime(13, 0),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get('/attendance/list');
+
+        $response->assertStatus(200);
+
+        $response->assertSee('09:00');
+        $response->assertSee('18:00');
+        $response->assertSee('1:00');
+        $response->assertSee('8:00');
     }
 }
