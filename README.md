@@ -8,53 +8,37 @@
 
 1. リポジトリをクローンします。
 
-```bash
-git clone <リポジトリURL>
-```
+    git clone <リポジトリURL>
 
 2. プロジェクトディレクトリへ移動します。
 
-```bash
-cd kintai-app
-```
+    cd kintai-app
 
 3. Dockerコンテナをビルド・起動します。
 
-```bash
-docker compose up -d --build
-```
+    docker compose up -d --build
 
 ### Laravel環境構築
 
 1. PHPコンテナに入ります。
 
-```bash
-docker compose exec php bash
-```
+    docker compose exec php bash
 
 2. Composerパッケージをインストールします。
 
-```bash
-composer install
-```
+    composer install
 
 3. `.env.example` をコピーして `.env` を作成します。
 
-```bash
-cp .env.example .env
-```
+    cp .env.example .env
 
 4. アプリケーションキーを生成します。
 
-```bash
-php artisan key:generate
-```
+    php artisan key:generate
 
 5. マイグレーションとシーディングを実行します。
 
-```bash
-php artisan migrate:fresh --seed
-```
+    php artisan migrate:fresh --seed
 
 以上で環境構築は完了です。
 
@@ -96,9 +80,7 @@ php artisan migrate:fresh --seed
 
 以下のコマンドを実行することで、ユーザー・勤怠・休憩のダミーデータが作成されます。
 
-```bash
-php artisan migrate:fresh --seed
-```
+    php artisan migrate:fresh --seed
 
 作成されるユーザーは以下の通りです。
 
@@ -111,19 +93,21 @@ php artisan migrate:fresh --seed
 
 PHPコンテナ内で以下のコマンドを実行します。
 
-```bash
-php artisan test
-```
+    php artisan test
+
+全テストが成功することを確認しています。
 
 ## ER図
 
-![ER図](ER.png)
+![ER図](./docs/er-diagram.png)
+
 
 ## 主な機能
 
 ### 一般ユーザー
 
 - 会員登録
+- メール認証
 - ログイン・ログアウト
 - 出勤
 - 退勤
@@ -132,6 +116,7 @@ php artisan test
 - 勤怠詳細表示
 - 勤怠修正申請
 - 修正申請一覧表示
+- 修正申請詳細表示
 
 ### 管理者
 
@@ -148,12 +133,8 @@ php artisan test
 
 データベース名：
 
-```text
-laravel_db
-```
+    laravel_db
 
 phpMyAdminからデータベースを確認できます。
 
-```text
-http://localhost:8080/
-```
+    http://localhost:8080/
