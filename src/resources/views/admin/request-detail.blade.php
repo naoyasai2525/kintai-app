@@ -35,6 +35,7 @@
                 <span>
                     {{ \Carbon\Carbon::parse($request->attendance->work_date)->format('Y年') }}
                 </span>
+
                 <span>
                     {{ \Carbon\Carbon::parse($request->attendance->work_date)->format('n月j日') }}
                 </span>
@@ -56,30 +57,35 @@
             </td>
         </tr>
 
-        @forelse($request->attendance->breakTimes as $index => $breakTime)
-        <tr>
-            <th>
-                {{ $index === 0 ? '休憩' : '休憩' . ($index + 1) }}
-            </th>
-            <td>
-                <span>
-                    {{ \Carbon\Carbon::parse($breakTime->break_start)->format('H:i') }}
-                </span>
+        @forelse($request->requestBreaks as $index => $breakTime)
 
-                <span class="request-detail__separator">～</span>
+            <tr>
+                <th>
+                    休憩{{ $index + 1 }}
+                </th>
 
-                <span>
-                    {{ $breakTime->break_end
-                        ? \Carbon\Carbon::parse($breakTime->break_end)->format('H:i')
-                        : '' }}
-                </span>
-            </td>
-        </tr>
+                <td>
+                    <span>
+                        {{ \Carbon\Carbon::parse($breakTime->break_start)->format('H:i') }}
+                    </span>
+
+                    <span class="request-detail__separator">～</span>
+
+                    <span>
+                        {{ $breakTime->break_end
+                            ? \Carbon\Carbon::parse($breakTime->break_end)->format('H:i')
+                            : '' }}
+                    </span>
+                </td>
+            </tr>
+
         @empty
-        <tr>
-            <th>休憩</th>
-            <td>-</td>
-        </tr>
+
+            <tr>
+                <th>休憩</th>
+                <td>-</td>
+            </tr>
+
         @endforelse
 
         <tr>
@@ -95,7 +101,10 @@
 
         @if($request->status === 'pending')
 
-            <form action="{{ route('admin.request.approve', $request) }}" method="POST">
+            <form
+                action="{{ route('admin.request.approve', $request) }}"
+                method="POST"
+            >
                 @csrf
 
                 <button type="submit">

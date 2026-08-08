@@ -33,13 +33,18 @@ class RequestController extends Controller
     }
 
     public function detail(AttendanceCorrectionRequest $request)
-{
-    $request->load([
-        'attendance.user',
-        'attendance.breakTimes',
-    ]);
+    {
+        // 他ユーザーの申請詳細を見られないようにする
+        if ($request->attendance->user_id !== Auth::id()) {
+            abort(403);
+        }
 
-    return view('admin.request-detail', compact('request'));
-}
+        $request->load([
+            'attendance.user',
+            'attendance.breakTimes',
+            'requestBreaks',
+        ]);
 
+        return view('request.detail', compact('request'));
+    }
 }

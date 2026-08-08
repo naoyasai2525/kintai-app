@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AttendanceCorrectionRequest;
+use App\Models\BreakTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RequestController extends Controller
 {
@@ -33,7 +35,7 @@ class RequestController extends Controller
     {
         $request->load([
             'attendance.user',
-            'attendance.breakTimes',
+            'requestBreaks',
         ]);
 
         return view('admin.request-detail', compact('request'));
@@ -41,15 +43,49 @@ class RequestController extends Controller
 
     public function approve(AttendanceCorrectionRequest $request)
     {
-        $request->attendance->update([
-            'clock_in' => $request->attendance->work_date . ' ' . $request->requested_clock_in,
-            'clock_out' => $request->attendance->work_date . ' ' . $request->requested_clock_out,
+        if ($request->status === 'approved') {
+            return redirect()
+                ->route('admin.request.detail', $request)
+                ->with('success', 'この申請は承認済みです。');
+        }
+
+        $request->load([
+            'attendance',
+            'requestBreaks',
         ]);
 
-        $request->update([
-            'status' => 'approved',
-            'approved_at' => now(),
-        ]);
+        DB::transaction(function () use ($request) {
+
+            $attendance = $request->attendance;
+            $workDate = $attendance->work_date;
+
+            // 出勤・退勤を申請内容に更新
+            $attendance->update([
+                'clock_in' => $workDate . ' ' . $request->requested_clock_in,
+                'clock_out' => $workDate . ' ' . $request->requested_clock_out,
+            ]);
+
+            // 元の休憩データを削除
+            $attendance->breakTimes()->delete();
+
+            // 申請された休憩データを登録
+            foreach ($request->requestBreaks as $requestBreak) {
+
+                BreakTime::create([
+                    'attendance_id' => $attendance->id,
+                    'break_start' => $workDate . ' ' . $requestBreak->break_start,
+                    'break_end' => $requestBreak->break_end
+                        ? $workDate . ' ' . $requestBreak->break_end
+                        : null,
+                ]);
+            }
+
+            // 申請を承認済みにする
+            $request->update([
+                'status' => 'approved',
+                'approved_at' => now(),
+            ]);
+        });
 
         return redirect()
             ->route('admin.request.detail', $request)

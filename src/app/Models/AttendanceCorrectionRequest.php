@@ -22,4 +22,12 @@ class AttendanceCorrectionRequest extends Model
     {
         return $this->belongsTo(Attendance::class);
     }
+
+    public function requestBreaks()
+    {
+        return $this->hasMany(
+            AttendanceCorrectionRequestBreak::class,
+            'attendance_correction_request_id'
+        );
+    }
 }

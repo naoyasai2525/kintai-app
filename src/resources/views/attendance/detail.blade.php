@@ -24,13 +24,19 @@
 
             <tr>
                 <th>名前</th>
-                <td colspan="3">{{ $attendance->user->name }}</td>
+                <td colspan="3">
+                    {{ $attendance->user->name }}
+                </td>
             </tr>
 
             <tr>
                 <th>日付</th>
-                <td>{{ \Carbon\Carbon::parse($attendance->work_date)->format('Y年') }}</td>
-                <td colspan="2">{{ \Carbon\Carbon::parse($attendance->work_date)->format('n月j日') }}</td>
+                <td>
+                    {{ \Carbon\Carbon::parse($attendance->work_date)->format('Y年') }}
+                </td>
+                <td colspan="2">
+                    {{ \Carbon\Carbon::parse($attendance->work_date)->format('n月j日') }}
+                </td>
             </tr>
 
             <tr>
@@ -39,8 +45,16 @@
                     <input
                         type="time"
                         name="clock_in"
-                        value="{{ optional($attendance->clock_in ? \Carbon\Carbon::parse($attendance->clock_in) : null)->format('H:i') }}"
+                        value="{{ $attendance->clock_in
+                            ? \Carbon\Carbon::parse($attendance->clock_in)->format('H:i')
+                            : '' }}"
                     >
+
+                    @error('clock_in')
+                        <p class="attendance-detail__error">
+                            {{ $message }}
+                        </p>
+                    @enderror
                 </td>
             </tr>
 
@@ -50,15 +64,84 @@
                     <input
                         type="time"
                         name="clock_out"
-                        value="{{ optional($attendance->clock_out ? \Carbon\Carbon::parse($attendance->clock_out) : null)->format('H:i') }}"
+                        value="{{ $attendance->clock_out
+                            ? \Carbon\Carbon::parse($attendance->clock_out)->format('H:i')
+                            : '' }}"
+                    >
+
+                    @error('clock_out')
+                        <p class="attendance-detail__error">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </td>
+            </tr>
+
+            @foreach ($attendance->breakTimes as $index => $break)
+
+                <tr>
+                    <th>
+                        休憩{{ $index + 1 }}
+                    </th>
+
+                    <td>
+                        <input
+                            type="time"
+                            name="breaks[{{ $index }}][break_start]"
+                            value="{{ $break->break_start
+                                ? \Carbon\Carbon::parse($break->break_start)->format('H:i')
+                                : '' }}"
+                        >
+                    </td>
+
+                    <td>〜</td>
+
+                    <td>
+                        <input
+                            type="time"
+                            name="breaks[{{ $index }}][break_end]"
+                            value="{{ $break->break_end
+                                ? \Carbon\Carbon::parse($break->break_end)->format('H:i')
+                                : '' }}"
+                        >
+                    </td>
+                </tr>
+
+            @endforeach
+
+            <tr>
+                <th>
+                    休憩{{ $attendance->breakTimes->count() + 1 }}
+                </th>
+
+                <td>
+                    <input
+                        type="time"
+                        name="breaks[{{ $attendance->breakTimes->count() }}][break_start]"
+                    >
+                </td>
+
+                <td>〜</td>
+
+                <td>
+                    <input
+                        type="time"
+                        name="breaks[{{ $attendance->breakTimes->count() }}][break_end]"
                     >
                 </td>
             </tr>
 
             <tr>
                 <th>備考</th>
+
                 <td colspan="3">
-                    <textarea name="note"></textarea>
+                    <textarea name="note">{{ old('note', $attendance->note) }}</textarea>
+
+                    @error('note')
+                        <p class="attendance-detail__error">
+                            {{ $message }}
+                        </p>
+                    @enderror
                 </td>
             </tr>
 

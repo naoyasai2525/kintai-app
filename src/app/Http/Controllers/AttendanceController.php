@@ -20,27 +20,20 @@ class AttendanceController extends Controller
         $status = '勤務外';
 
         if ($attendance) {
-
             $lastBreak = $attendance->breakTimes()
                 ->latest()
                 ->first();
 
             if ($attendance->clock_out) {
-
                 $status = '退勤済';
-
             } elseif (
                 $lastBreak &&
                 $lastBreak->break_start &&
                 !$lastBreak->break_end
             ) {
-
                 $status = '休憩中';
-
             } else {
-
                 $status = '出勤中';
-
             }
         }
 
@@ -57,13 +50,11 @@ class AttendanceController extends Controller
             ->first();
 
         if (!$todayAttendance) {
-
             Attendance::create([
-                'user_id'   => Auth::id(),
+                'user_id' => Auth::id(),
                 'work_date' => today(),
-                'clock_in'  => now(),
+                'clock_in' => now(),
             ]);
-
         }
 
         return redirect()->back();
@@ -76,11 +67,9 @@ class AttendanceController extends Controller
             ->first();
 
         if ($attendance && !$attendance->clock_out) {
-
             $attendance->update([
                 'clock_out' => now(),
             ]);
-
         }
 
         return redirect()->back();
@@ -93,11 +82,9 @@ class AttendanceController extends Controller
             ->first();
 
         if ($attendance) {
-
             $attendance->breakTimes()->create([
                 'break_start' => now(),
             ]);
-
         }
 
         return redirect()->back();
@@ -110,20 +97,16 @@ class AttendanceController extends Controller
             ->first();
 
         if ($attendance) {
-
             $break = $attendance->breakTimes()
                 ->whereNull('break_end')
                 ->latest()
                 ->first();
 
             if ($break) {
-
                 $break->update([
                     'break_end' => now(),
                 ]);
-
             }
-
         }
 
         return redirect()->back();
@@ -153,6 +136,11 @@ class AttendanceController extends Controller
             abort(403);
         }
 
+        $attendance->load([
+            'user',
+            'breakTimes',
+        ]);
+
         return view(
             'attendance.detail',
             compact('attendance')
@@ -162,15 +150,30 @@ class AttendanceController extends Controller
     public function update(
         AttendanceCorrectionRequest $request,
         Attendance $attendance
-    )
-    {
-        AttendanceCorrection::create([
+    ) {
+        if ($attendance->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $correction = AttendanceCorrection::create([
             'attendance_id' => $attendance->id,
             'requested_clock_in' => $request->clock_in,
             'requested_clock_out' => $request->clock_out,
             'note' => $request->note,
             'status' => 'pending',
         ]);
+
+        collect($request->input('breaks', []))
+            ->filter(function ($break) {
+                return !empty($break['break_start'])
+                    || !empty($break['break_end']);
+            })
+            ->each(function ($break) use ($correction) {
+                $correction->requestBreaks()->create([
+                    'break_start' => $break['break_start'],
+                    'break_end' => $break['break_end'] ?? null,
+                ]);
+            });
 
         return redirect()
             ->route('attendance.detail', $attendance)

@@ -55,6 +55,32 @@
             </td>
         </tr>
 
+        @foreach ($request->requestBreaks as $index => $break)
+            <tr>
+                <th>休憩{{ $index + 1 }}</th>
+
+                <td>
+                    <input
+                        type="time"
+                        value="{{ \Carbon\Carbon::parse($break->break_start)->format('H:i') }}"
+                        disabled
+                    >
+                </td>
+
+                <td class="attendance-detail__wave">
+                    〜
+                </td>
+
+                <td>
+                    <input
+                        type="time"
+                        value="{{ \Carbon\Carbon::parse($break->break_end)->format('H:i') }}"
+                        disabled
+                    >
+                </td>
+            </tr>
+        @endforeach
+
         <tr>
             <th>備考</th>
             <td colspan="3">
@@ -70,6 +96,12 @@
         </tr>
 
     </table>
+
+    @if ($request->status === 'pending')
+        <p class="attendance-detail__message">
+            承認待ちのため修正はできません。
+        </p>
+    @endif
 
 </div>
 
