@@ -8,7 +8,7 @@
 
 1. リポジトリをクローンします。
 
-    git clone <リポジトリURL>
+    git clone https://github.com/naoyasai2525/kintai-app.git
 
 2. プロジェクトディレクトリへ移動します。
 
